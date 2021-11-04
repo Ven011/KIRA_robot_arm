@@ -95,18 +95,18 @@ class Kinematics: #Kinematics class
 
 
 kinematics = Kinematics()
-servo1 = Servo_control(4) #Outer most servo
+servo1 = Servo_control(2) #Outer most servo
 servo2 = Servo_control(3)
-servo3 = Servo_control(2) #Inner most servo
+servo3 = Servo_control(4) #Inner most servo
 
 while True:
 	ang1 = int(input("Joint 0 angle: "))
 	ang2 = int(input("Joint 1 angle: "))
 	ang3 = int(input("Joint 2 angle: "))
 
-	servo3.set_position(ang3)
+	servo1.set_position(ang1)
 	servo2.set_position(ang2)
-	servo1.set_position(ang1) #Write servo position
+	servo3.set_position(ang3) #Write servo position. Starting from the innermost servo to reduce backlash
 
 	x, y = kinematics.F_with(ang1, ang2, ang3)
 	print('x: ' + str(x+31.6)) #Account for distance between actual start of robot arm and the arm holder
