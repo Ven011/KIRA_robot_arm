@@ -54,12 +54,16 @@ class Kinematics: #Kinematics class
 		self.a1 = 86.80 
 		self.a2 = 86.80
 		self.a3 = 65.05
-
-	#Calculates and returns the position of the specified joint
-	def get_joint_pos(self, J_num): #Param is the joint number desired (innermost joint/servo = 1, middle = 2, outermost = 3, end-effector = 4)
 		
+		#Servo/ joint angles
+		self.J0 = 0
+		self.J1 = 0
+		self.J2 = 0
 
-	def forward_with(self, T0, T1, T2): #Params are angles in degrees to set the servo of each module
+	#Calculates and returns the position of the specified joint given the joint angles
+	def get_joint_pos(self, J_num, T0 = 0, T1 = 0, T2 = 0): #Params: 1. The joint number desired (innermost joint/servo = 0, middle = 1, outermost = 1, end-effector = 3)
+															#        2, 3, 4. The theta angles that the servos are written to. T0 = servo 1 - innermost servo, ..., T2 = servo 2 - outermost servo
+
 		#Change servo position value to degree value E.x. 90 degree servo pos = 0 degree
 		#						  0 servo pos = 90 degree
 		#                                                 180 servo pos = -90 degree
@@ -68,12 +72,13 @@ class Kinematics: #Kinematics class
 		T0 = (T0 - 90) * -1
 		T1 = (T1 - 90) * -1
 		T2 = (T2 - 90) * -1
+
 		#Change angle values from degrees to radians
 		rT0 = (T0 * np.pi) / 180
 		rT1 = (T1 * np.pi) / 180
 		rT2 = (T2 * np.pi) / 180
-		#Get HTM 0_3
-			#Define all lower level HTMs
+
+		#Define all "local" HTMs
 		H0_1 = np.array([[m.cos(rT0), -1*m.sin(rT0), 0, self.a1*m.cos(rT0)],
 				 [m.sin(rT0), m.cos(rT0), 0, self.a1*m.sin(rT0)],
 				 [0, 0, 1, 0],
@@ -86,21 +91,49 @@ class Kinematics: #Kinematics class
                                  [m.sin(rT2), m.cos(rT2), 0, self.a3*m.sin(rT2)],
                                  [0, 0, 1, 0],
                                  [0, 0, 0, 1]])
-			#Multiply all HTMs to get H0_3
+		
+		#Find the dot product of the "local" HTMs to get the "global" HTMs
 		H0_2 = H0_1.dot(H1_2)
 		H0_3 = H0_2.dot(H2_3)
-		#Use HTM to calculate position of the end-effector
-		x_pos = H0_3[0, 3]
-		y_pos = H0_3[1, 3]
-		#Print the position of the end-effector given the input angles
+
+		#Use the joint number argument to determine what HTM to read the positions from
+		x_pos, y_pos = 0
+		if J_num == 0: #Joint 0 position was requested
+			pass #Since joint 0 is the "origin" of the robot at pos (x = 0, y = 0)
+		elif J_num == 1: #Joint 1 pos. is requested
+			x_pos = H0_1[0, 3] #Get x from the displacement vector's x component of HTM 0_1
+			y_pos = H0_1[1, 3] #Get y
+		elif J_num == 2: #Joint 2 pos. is requested
+			x_pos = H0_2[0, 3]
+			y_pos = H0_2[1, 3]
+		elif J_num == 3: #End-effector pos. is requested
+			x_pos = H0_3[0, 3]
+			y_pos = H0_3[1, 3]
 
 		return x_pos, y_pos
 
-	def inverse_with(self, x, y): #Params are the x and y coordinate to place the end effector.
+	def play_forward(self): #Params are angles in degrees to set the servo of each module
+		#Get the angles to be written.
+		self.J0 = int(input("Joint 0 angle: "))
+		self.J1 = int(input("Joint 1 angle: "))
+		self.J2 = int(input("Joint 2 angle: "))
+
+		#Set the servos to the specified angles
+		servo0.set_position(self.J0)
+		servo1.set_position(self.J1)
+		servo2.set_position(self.J2) #Write servo position. Starting from the innermost servo to reduce backlash
+
+		#Get the position of the end-effector.
+		x, y = self.get_joint_pos(4, T0 = self.J0, T1 = self.J1, T2 = self.J2)
+		print('x: ' + str(x+31.6)) #Account for distance between actual start of robot arm and the arm holder
+		print('y: ' + str(y))
+		print()
+
+	def play_inverse(self, x, y): #Params are the x and y coordinate to place the end effector.
 		#Declare and/or Initialize essential variables
-		J1_ang = 0 #Joint 1 (Innermost servo) is set to 0 degrees
+		J0_ang = 0 #Joint 1 (Innermost servo) is set to 0 degrees
+		J1_ang = 180
 		J2_ang = 180
-		J3_ang = 180
 
 		k = 1 #Joint counter
 		goal_reached = False
@@ -110,21 +143,9 @@ class Kinematics: #Kinematics class
 
 
 kinematics = Kinematics()
-servo1 = Servo_control(2) #Outer most servo
-servo2 = Servo_control(3)
-servo3 = Servo_control(4) #Inner most servo
+servo0 = Servo_control(2) #Outer most servo
+servo1 = Servo_control(3)
+servo2 = Servo_control(4) #Inner most servo
 
 while True:
-	ang1 = int(input("Joint 0 angle: "))
-	ang2 = int(input("Joint 1 angle: "))
-	ang3 = int(input("Joint 2 angle: "))
-
-	servo1.set_position(ang1)
-	servo2.set_position(ang2)
-	servo3.set_position(ang3) #Write servo position. Starting from the innermost servo to reduce backlash
-
-	x, y = kinematics.forward_with(ang1, ang2, ang3)
-	print('x: ' + str(x+31.6)) #Account for distance between actual start of robot arm and the arm holder
-	print('y: ' + str(y))
-	print()
-
+    kinematics.play_forward()
