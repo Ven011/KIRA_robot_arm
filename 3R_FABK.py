@@ -128,9 +128,9 @@ class Kinematics: #Kinematics class
 	def play_inverse(self, x_g, y_g, n): #Params: 1, 2. The x and y coordinate to place the end effector/ the goal position's x and y coordinate
 									  #        3. Number of iterations of the algorithm we should go through 
 		# #Declare and/or Initialize essential variables
-		# J0_ang = 0 #Joint 1 (Innermost servo) is set to 0 degrees
-		# J1_ang = 180
-		# J2_ang = 180
+		servo0.currentServoPos = 0 #Joint 1 (Innermost servo) is set to 0 degrees
+		servo1.currentServoPos = 180
+		servo2.currentServoPos = 180
 
 		k = 0 #Joint counter
 
@@ -161,15 +161,18 @@ class Kinematics: #Kinematics class
 			#Change the kth joint's angle by the calculated angle
 			if k == 0:
     				servo0.currentServoPos = servo0.currentServoPos + ang
+				print(servo0.currentServoPos)
 			elif k == 1:
     				servo1.currentServoPos = servo1.currentServoPos + ang
+				print(servo1.currentServoPos)
 			elif k ==2:
-					servo2.currentServoPos = servo2.currentServoPos + ang
+				servo2.currentServoPos = servo2.currentServoPos + ang
+				print(servo2.currentServoPos)
 
-			print("Angle: " + ang)
-			print("Joint: " + k)
+			print((ang*m.pi)/180) #Turn radians to degrees
+			print(k)
 
-			sleep(6)
+			sleep(10)
 
 			#Increment the joint counter
 			if k < 3: 
