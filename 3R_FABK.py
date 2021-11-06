@@ -111,7 +111,8 @@ class Kinematics: #Kinematics class
 
 		return x_pos+31.6, y_pos  # (+31.6) is to account for the fact that the first joint is technically not at (0,0) 
 
-	def play_forward(self): #Params are angles in degrees to set the servo of each module
+
+	def play_forward(self):
 		#Get the angles to be written.
 		ang0 = int(input("Joint 0 angle: "))
 		ang1 = int(input("Joint 1 angle: "))
@@ -127,6 +128,38 @@ class Kinematics: #Kinematics class
 		print('x: ' + str(x)) #Account for distance between actual start of robot arm and the arm holder
 		print('y: ' + str(y))
 		print()
+
+
+	#For Inverse Kinematics: Determines whether the calculated angle should be added or subtracted from a joint/servo. returns false if it should be subtracted, true otherwise
+	def add_angle(self, J_num, ang, x_g, y_g):	#Params: 1. k - joint number
+										#        2. Angle that the servo should be changed by
+										#        3, 4. Goal point x and y
+		#Calculate the slope between the joint and the goal point
+			#Get the joint's position
+		x_j, y_j = self.get_joint_pos(J_num, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg)
+			#Use slope formula to calculate the slope
+		comp_slope = (y_g - y_j) / (x_g - x_j)
+
+		#Add the angle to the joint and see if the resulting slope between the end-effector and the goal point matches the comp_slope
+			#Get the position of the end-effector given the you have added the angle to the kth joint
+		if J_num == 0: x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg + ang, servo1.currentServoPos_deg, servo2.currentServoPos_deg)
+		elif J_num == 1: x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg + ang, servo2.currentServoPos_deg)
+		elif J_num == 2: x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg + ang)
+			#Calculate the slope of the line between the end-effector and the goal point
+		add_slope =  (y_g - y_e) / (x_g - x_e)
+
+		#Subtract the angle to the joint and see if the resulting slope between the end-effector and the goal point matches the comp_slope
+			#Get the position of the end-effector given the you have subtracted the angle to the kth joint
+		if J_num == 0: x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg - ang, servo1.currentServoPos_deg, servo2.currentServoPos_deg)
+		elif J_num == 1: x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg - ang, servo2.currentServoPos_deg)
+		elif J_num == 2: x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg - ang)
+			#Calculate the slope of the line between the end-effector and the goal point
+		add_slope =  (y_g - y_e) / (x_g - x_e)
+
+		#Compare the slopes, add_slope has to be within some range of the comp_slope
+		if add_slope > comp_slope - 1 and add_slope < comp_slope + 1: return True
+		else: return False
+
 
 	def play_inverse(self, x_g, y_g, n): #Params: 1, 2. The x and y coordinate to place the end effector/ the goal position's x and y coordinate
 									  #        3. Number of iterations of the algorithm we should go through 
@@ -147,7 +180,7 @@ class Kinematics: #Kinematics class
 				#Get the end-effector's current position given the current joint angles
 			x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg); print(x_e, y_e)
 				#Get the kth joint's current position given the current joint angles
-			x_j, y_j = self.get_joint_pos(k, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg); print(x_j, y_j)
+			x_j, y_j = self.get_joint_pos(k, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg)
 				#Calculate the component values for vector JE (Joint to end-effector)
 			v_JE[0] = x_e - x_j
 			v_JE[1] = y_e - y_j
@@ -164,21 +197,30 @@ class Kinematics: #Kinematics class
 			ang_deg = (ang*180)/m.pi; print("To write ang: "+ str(ang_deg))
 
 			#Change the kth joint's angle by the calculated angle
-			if k == 0 and servo0.currentServoPos_deg + ang_deg < 180: 
-				servo0.set_position(servo0.currentServoPos_deg + ang_deg); 
+			if k == 0:
+				#Check whether the determined angle should be added or subtracted
+				if self.add_angle(0, ang_deg, x_g, y_g): servo0.set_position(servo0.currentServoPos_deg + ang_deg); 
+				else: servo0.set_position(servo0.currentServoPos_deg - ang_deg);
+
 				print("New_ang: " + str(servo0.currentServoPos_deg))
-			elif k == 1 and servo1.currentServoPos_deg - ang_deg > 180: 
-				servo1.set_position(servo1.currentServoPos_deg - ang_deg); 
+			elif k == 1: 
+				#Check whether the determined angle should be added or subtracted
+				if self.add_angle(1, ang_deg, x_g, y_g): servo1.set_position(servo1.currentServoPos_deg + ang_deg); 
+				else: servo1.set_position(servo1.currentServoPos_deg - ang_deg);
+
 				print("New_ang: " + str(servo1.currentServoPos_deg))
-			elif k == 2 and servo2.currentServoPos_deg - ang_deg > 180: 
-				servo2.set_position(servo2.currentServoPos_deg - ang_deg); 
+			elif k == 2: 
+				#Check whether the determined angle should be added or subtracted
+				if self.add_angle(2, ang_deg, x_g, y_g): servo2.set_position(servo2.currentServoPos_deg + ang_deg); 
+				else: servo2.set_position(servo2.currentServoPos_deg - ang_deg);
+
 				print("New_ang: " + str(servo2.currentServoPos_deg))
 
 			#Increment the joint counter
 			k+=1
 			if k == 3: k = 0
 
-			sleep(0.5)
+			sleep(0.25)
 
 
 kinematics = Kinematics()
