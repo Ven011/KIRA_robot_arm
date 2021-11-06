@@ -160,7 +160,7 @@ class Kinematics: #Kinematics class
 		print("-: " + str(subtract_slope))
 
 		#Compare the slopes, add_slope has to be within some range of the comp_slope
-		if add_slope > comp_slope - 1 and add_slope < comp_slope + 1: return True
+		if add_slope > comp_slope - 0.2 and add_slope < comp_slope + 0.2: return True
 		else: return False
 
 
