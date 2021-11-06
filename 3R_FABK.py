@@ -164,17 +164,19 @@ class Kinematics: #Kinematics class
 			ang_deg = (ang*180)/m.pi; print("To write ang: "+ str(ang_deg))
 
 			#Change the kth joint's angle by the calculated angle
-			if k == 0: servo0.set_position(servo0.currentServoPos_deg + ang_deg); print("New_ang: " + str(servo0.currentServoPos_deg))
-			elif k == 1: servo1.set_position(servo1.currentServoPos_deg - ang_deg); print("New_ang: " + str(servo1.currentServoPos_deg))
-			elif k == 2: servo2.set_position(servo2.currentServoPos_deg - ang_deg); print("New_ang: " + str(servo2.currentServoPos_deg))
-
-			# print((ang*m.pi)/180) #Turn radians to degrees
-			# print(k)
+			if k == 0 and servo0.currentServoPos_deg + ang_deg < 180: 
+				servo0.set_position(servo0.currentServoPos_deg + ang_deg); 
+				print("New_ang: " + str(servo0.currentServoPos_deg))
+			elif k == 1 and servo1.currentServoPos_deg - ang_deg > 180: 
+				servo1.set_position(servo1.currentServoPos_deg - ang_deg); 
+				print("New_ang: " + str(servo1.currentServoPos_deg))
+			elif k == 2 and servo2.currentServoPos_deg - ang_deg > 180: 
+				servo2.set_position(servo2.currentServoPos_deg - ang_deg); 
+				print("New_ang: " + str(servo2.currentServoPos_deg))
 
 			#Increment the joint counter
 			k+=1
 			if k == 3: k = 0
-			print(k-1)
 
 			sleep(0.5)
 
