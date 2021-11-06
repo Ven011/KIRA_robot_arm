@@ -231,7 +231,8 @@ class Kinematics: #Kinematics class
 
 			sleep(0.25)
 
-		print("End-effector pos: " + str(*self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg)))
+		x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg);
+		print("End-effector pos: " + str(x_e) + str(y_e))
 		print("Goal pos: " + str(x_g) + str(y_g))
 
 
