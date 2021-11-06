@@ -54,11 +54,6 @@ class Kinematics: #Kinematics class
 		self.a1 = 86.80 
 		self.a2 = 86.80
 		self.a3 = 65.05
-		
-		#Servo/ joint angles
-		self.J0 = 0
-		self.J1 = 0
-		self.J2 = 0
 
 	#Calculates and returns the position of the specified joint given the joint angles
 	def get_joint_pos(self, J_num, T0 = 0, T1 = 0, T2 = 0): #Params: 1. The joint number desired (innermost joint/servo = 0, middle = 1, outermost = 1, end-effector = 3)
@@ -97,7 +92,8 @@ class Kinematics: #Kinematics class
 		H0_3 = H0_2.dot(H2_3)
 
 		#Use the joint number argument to determine what HTM to read the positions from
-		x_pos, y_pos = 0
+		x_pos = 0
+		y_pos = 0
 		if J_num == 0: #Joint 0 position was requested
 			pass #Since joint 0 is the "origin" of the robot at pos (x = 0, y = 0)
 		elif J_num == 1: #Joint 1 pos. is requested
@@ -114,17 +110,17 @@ class Kinematics: #Kinematics class
 
 	def play_forward(self): #Params are angles in degrees to set the servo of each module
 		#Get the angles to be written.
-		self.J0 = int(input("Joint 0 angle: "))
-		self.J1 = int(input("Joint 1 angle: "))
-		self.J2 = int(input("Joint 2 angle: "))
+		ang0 = int(input("Joint 0 angle: "))
+		ang1 = int(input("Joint 1 angle: "))
+		ang2 = int(input("Joint 2 angle: "))
 
 		#Set the servos to the specified angles
-		servo0.set_position(self.J0)
-		servo1.set_position(self.J1)
-		servo2.set_position(self.J2) #Write servo position. Starting from the innermost servo to reduce backlash
+		servo0.set_position(ang0)
+		servo1.set_position(ang1)
+		servo2.set_position(ang2) #Write servo position. Starting from the innermost servo to reduce backlash
 
 		#Get the position of the end-effector.
-		x, y = self.get_joint_pos(4, T0 = self.J0, T1 = self.J1, T2 = self.J2)
+		x, y = self.get_joint_pos(3, ang0, ang1, ang2)
 		print('x: ' + str(x+31.6)) #Account for distance between actual start of robot arm and the arm holder
 		print('y: ' + str(y))
 		print()
@@ -137,9 +133,6 @@ class Kinematics: #Kinematics class
 
 		k = 1 #Joint counter
 		goal_reached = False
-
-		
-
 
 
 kinematics = Kinematics()
