@@ -231,6 +231,9 @@ class Kinematics: #Kinematics class
 
 			sleep(0.25)
 
+		print("End-effector pos: " + str(*self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg)))
+		print("Goal pos: " + str(x_g) + str(y_g))
+
 
 kinematics = Kinematics()
 servo0 = Servo_control(2) #Outer most servo
