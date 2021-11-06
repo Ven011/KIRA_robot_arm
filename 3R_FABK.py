@@ -125,14 +125,60 @@ class Kinematics: #Kinematics class
 		print('y: ' + str(y))
 		print()
 
-	def play_inverse(self, x, y): #Params are the x and y coordinate to place the end effector.
-		#Declare and/or Initialize essential variables
-		J0_ang = 0 #Joint 1 (Innermost servo) is set to 0 degrees
-		J1_ang = 180
-		J2_ang = 180
+	def play_inverse(self, x_g, y_g, n): #Params: 1, 2. The x and y coordinate to place the end effector/ the goal position's x and y coordinate
+									  #        3. Number of iterations of the algorithm we should go through 
+		# #Declare and/or Initialize essential variables
+		# J0_ang = 0 #Joint 1 (Innermost servo) is set to 0 degrees
+		# J1_ang = 180
+		# J2_ang = 180
 
-		k = 1 #Joint counter
-		goal_reached = False
+		k = 0 #Joint counter
+
+		#Declare the vectors to be used
+		v_JE = np.array([0, 0]) #vector from the current Joint to the End-effector
+		v_JG = np.array([0, 0]) #vector from the current Joint to the Goal point
+
+		for _ in range(0, n):
+			#Determine the vector component values depending on the joint counter value
+				#Get the end-effector's current position given the current joint angles
+			x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos, servo1.currentServoPos, servo2.currentServoPos)
+				#Get the kth joint's current position given the current joint angles
+			x_j, y_j = self.get_joint_pos(k, servo0.currentServoPos, servo1.currentServoPos, servo2.currentServoPos)
+				#Calculate the component values for vector JE (Joint to end-effector)
+			v_JE[0] = x_e - x_j
+			v_JE[1] = y_e - y_j
+				#Calculate the component values for vector JG (Joint to goal point)
+			v_JG[0] = x_g - x_j
+			v_JG[1] = y_g - y_j
+			
+			#Find the magnitude of the vectors
+			mag_v_JE = np.sqrt(v_JE.dot(v_JE)) #The dot gives you the value underneath the sqrt of a magnitude formula; therefore, sqrt gives the magnitude
+			mag_v_JG = np.sqrt(v_JG.dot(v_JG))
+
+			#Use the dot product formula to calculate the angle between the two vectors
+			ang = m.acos( (v_JE.dot(v_JG)) / (mag_v_JE*mag_v_JG) )
+
+			#Change the kth joint's angle by the calculated angle
+			if k == 0:
+    				servo0.currentServoPos = servo0.currentServoPos + ang
+			elif k == 1:
+    				servo1.currentServoPos = servo1.currentServoPos + ang
+			elif k ==2:
+					servo2.currentServoPos = servo2.currentServoPos + ang
+
+			print("Angle: " + ang)
+			print("Joint: " + k)
+
+			sleep(6)
+
+			#Increment the joint counter
+			if k < 3: 
+					k+=1
+			elif k == 2:
+    				k = 0
+
+
+			
 
 
 kinematics = Kinematics()
@@ -141,4 +187,5 @@ servo1 = Servo_control(3)
 servo2 = Servo_control(4) #Inner most servo
 
 while True:
-    kinematics.play_forward()
+    # kinematics.play_forward()
+	kinematics.play_inverse(0, 238.65, 50)
