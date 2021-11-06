@@ -218,6 +218,12 @@ class Kinematics: #Kinematics class
 				elif not self.add_angle(0, ang_deg, x_g, y_g) and servo2.currentServoPos_deg - ang_deg >= 0: servo2.set_position(servo2.currentServoPos_deg - ang_deg);
 
 				print("New_ang: " + str(servo2.currentServoPos_deg))
+			
+			#Check if the end-effector is within a reasonable range around the goal point and stop iterating if so.
+				#Calculate the end-effector's current position
+			x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg);
+				#Check if the end-effector is within a region around the goal point
+			if (x_e < x_g + 1 and x_e > x_g - 1) and (y_e < y_g + 1 and y_e > y_g - 1): break
 
 			#Increment the joint counter
 			k+=1
