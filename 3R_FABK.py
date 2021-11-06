@@ -202,20 +202,20 @@ class Kinematics: #Kinematics class
 			#Change the kth joint's angle by the calculated angle
 			if k == 0:
 				#Check whether the determined angle should be added or subtracted
-				if self.add_angle(0, ang_deg, x_g, y_g): servo0.set_position(servo0.currentServoPos_deg + ang_deg); 
-				else: servo0.set_position(servo0.currentServoPos_deg - ang_deg);
+				if self.add_angle(0, ang_deg, x_g, y_g) and servo0.currentServoPos_deg + ang_deg <= 180: servo0.set_position(servo0.currentServoPos_deg + ang_deg); 
+				elif not self.add_angle(0, ang_deg, x_g, y_g) and servo0.currentServoPos_deg - ang_deg >= 0: servo0.set_position(servo0.currentServoPos_deg - ang_deg);
 
 				print("New_ang: " + str(servo0.currentServoPos_deg))
 			elif k == 1: 
 				#Check whether the determined angle should be added or subtracted
-				if self.add_angle(1, ang_deg, x_g, y_g): servo1.set_position(servo1.currentServoPos_deg + ang_deg); 
-				else: servo1.set_position(servo1.currentServoPos_deg - ang_deg);
+				if self.add_angle(1, ang_deg, x_g, y_g) and servo1.currentServoPos_deg + ang_deg <= 180: servo1.set_position(servo1.currentServoPos_deg + ang_deg); 
+				elif not self.add_angle(0, ang_deg, x_g, y_g) and servo1.currentServoPos_deg - ang_deg >= 0: servo1.set_position(servo1.currentServoPos_deg - ang_deg);
 
 				print("New_ang: " + str(servo1.currentServoPos_deg))
 			elif k == 2: 
 				#Check whether the determined angle should be added or subtracted
-				if self.add_angle(2, ang_deg, x_g, y_g): servo2.set_position(servo2.currentServoPos_deg + ang_deg); 
-				else: servo2.set_position(servo2.currentServoPos_deg - ang_deg);
+				if self.add_angle(2, ang_deg, x_g, y_g) and servo2.currentServoPos_deg + ang_deg <= 180: servo2.set_position(servo2.currentServoPos_deg + ang_deg); 
+				elif not self.add_angle(0, ang_deg, x_g, y_g) and servo2.currentServoPos_deg - ang_deg >= 0: servo2.set_position(servo2.currentServoPos_deg - ang_deg);
 
 				print("New_ang: " + str(servo2.currentServoPos_deg))
 
