@@ -139,6 +139,7 @@ class Kinematics: #Kinematics class
 		x_j, y_j = self.get_joint_pos(J_num, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg)
 			#Use slope formula to calculate the slope
 		comp_slope = (y_g - y_j) / (x_g - x_j)
+		print("C: " + str(comp_slope))
 
 		#Add the angle to the joint and see if the resulting slope between the end-effector and the goal point matches the comp_slope
 			#Get the position of the end-effector given the you have added the angle to the kth joint
@@ -147,6 +148,7 @@ class Kinematics: #Kinematics class
 		elif J_num == 2: x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg + ang)
 			#Calculate the slope of the line between the end-effector and the goal point
 		add_slope =  (y_g - y_e) / (x_g - x_e)
+		print("+: " + str(add_slope))
 
 		#Subtract the angle to the joint and see if the resulting slope between the end-effector and the goal point matches the comp_slope
 			#Get the position of the end-effector given the you have subtracted the angle to the kth joint
@@ -154,7 +156,8 @@ class Kinematics: #Kinematics class
 		elif J_num == 1: x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg - ang, servo2.currentServoPos_deg)
 		elif J_num == 2: x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg - ang)
 			#Calculate the slope of the line between the end-effector and the goal point
-		add_slope =  (y_g - y_e) / (x_g - x_e)
+		subtract_slope =  (y_g - y_e) / (x_g - x_e)
+		print("-: " + str(subtract_slope))
 
 		#Compare the slopes, add_slope has to be within some range of the comp_slope
 		if add_slope > comp_slope - 1 and add_slope < comp_slope + 1: return True
@@ -178,7 +181,7 @@ class Kinematics: #Kinematics class
 			#print("S_0: " + str(servo0.currentServoPos_deg)); print("S_1: " + str(servo1.currentServoPos_deg)); print("S_2: " + str(servo2.currentServoPos_deg))
 			#Determine the vector component values depending on the joint counter value
 				#Get the end-effector's current position given the current joint angles
-			x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg); print(x_e, y_e)
+			x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg);
 				#Get the kth joint's current position given the current joint angles
 			x_j, y_j = self.get_joint_pos(k, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg)
 				#Calculate the component values for vector JE (Joint to end-effector)
