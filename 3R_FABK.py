@@ -159,22 +159,19 @@ class Kinematics: #Kinematics class
 			ang = m.acos( (v_JE.dot(v_JG)) / (mag_v_JE*mag_v_JG) ); print((ang*m.pi)/180)
 
 			#Change the kth joint's angle by the calculated angle
-			if k == 0: servo0.currentServoPos = servo0.currentServoPos + ang; print(servo0.currentServoPos)
-			elif k == 1: servo1.currentServoPos = servo1.currentServoPos + ang; print(servo1.currentServoPos)
-			elif k == 2: servo2.currentServoPos = servo2.currentServoPos + ang; print(servo2.currentServoPos)
+			if k == 0: servo0.currentServoPos = servo0.currentServoPos + ang; print((servo0.currentServoPos*m.pi)/180)
+			elif k == 1: servo1.currentServoPos = servo1.currentServoPos - ang; print(servo1.currentServoPos*m.pi/180)
+			elif k == 2: servo2.currentServoPos = servo2.currentServoPos - ang; print((servo2.currentServoPos*m.pi)/180)
 
 			# print((ang*m.pi)/180) #Turn radians to degrees
 			# print(k)
-
-			sleep(10)
 
 			#Increment the joint counter
 			if k < 3: k+=1
 			elif k == 2: k = 0
 			print(k-1)
-
-
 			
+			sleep(15)
 
 
 kinematics = Kinematics()
