@@ -160,10 +160,10 @@ class Kinematics: #Kinematics class
 
 			#Change the kth joint's angle by the calculated angle
 			if k == 0:
-    				servo0.currentServoPos = servo0.currentServoPos + ang
+    			servo0.currentServoPos = servo0.currentServoPos + ang
 				print(servo0.currentServoPos)
 			elif k == 1:
-    				servo1.currentServoPos = servo1.currentServoPos + ang
+    			servo1.currentServoPos = servo1.currentServoPos + ang
 				print(servo1.currentServoPos)
 			elif k ==2:
 				servo2.currentServoPos = servo2.currentServoPos + ang
@@ -176,9 +176,9 @@ class Kinematics: #Kinematics class
 
 			#Increment the joint counter
 			if k < 3: 
-					k+=1
+				k+=1
 			elif k == 2:
-    				k = 0
+    			k = 0
 
 
 			
