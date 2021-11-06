@@ -21,12 +21,13 @@ class Servo_control:
 		factory = PiGPIOFactory() #Using the piGPIO factory prevents servo jitter.
 		self.servo = Servo(pinNum, min_pulse_width = minPW, max_pulse_width = maxPW, pin_factory = factory)
 
-		self.currentServoPos = 0 #Set servo initial position to be 0/90 degrees
+		self.currentServoPos = 0 #Set servo initial position to be 0 / 90 degrees
+		self.currentServoPos_deg = 0
 		self.servo.value = self.currentServoPos
 
 	def set_position(self, deg): #Param. deg = Degree position to set the servo (0 - 180 degrees)
 		#Turn degree position into a value in the range between -1 and 1. 0 = -1 , 1 = 180 , 0 = 90 , etc.
-		pos = ((deg/180) - 0.5) * 2 
+		pos = (deg/90) - 1 
 		#Slowly write the servo to the value determined
 		if pos > self.currentServoPos:
 			writePos = self.currentServoPos #Get the servo's current position
@@ -46,6 +47,8 @@ class Servo_control:
 
 		elif pos == self.currentServoPos:
 			pass #Do nothing because we are already at that position
+
+		self.currentServoPos_deg = int((self.currentServoPos + 1) * 90); print(self.currentServoPos_deg)
 
 class Kinematics: #Kinematics class
 	#All distances are in millimeters (mm)
@@ -86,7 +89,7 @@ class Kinematics: #Kinematics class
                                  [m.sin(rT2), m.cos(rT2), 0, self.a3*m.sin(rT2)],
                                  [0, 0, 1, 0],
                                  [0, 0, 0, 1]])
-		
+
 		#Find the dot product of the "local" HTMs to get the "global" HTMs
 		H0_2 = H0_1.dot(H1_2)
 		H0_3 = H0_2.dot(H2_3)
@@ -106,7 +109,7 @@ class Kinematics: #Kinematics class
 			x_pos = H0_3[0, 3]
 			y_pos = H0_3[1, 3]
 
-		return x_pos, y_pos
+		return x_pos+31.6, y_pos  # (+31.6) is to account for the fact that the first joint is technically not at (0,0) 
 
 	def play_forward(self): #Params are angles in degrees to set the servo of each module
 		#Get the angles to be written.
@@ -121,7 +124,7 @@ class Kinematics: #Kinematics class
 
 		#Get the position of the end-effector.
 		x, y = self.get_joint_pos(3, ang0, ang1, ang2)
-		print('x: ' + str(x+31.6)) #Account for distance between actual start of robot arm and the arm holder
+		print('x: ' + str(x)) #Account for distance between actual start of robot arm and the arm holder
 		print('y: ' + str(y))
 		print()
 
@@ -139,39 +142,41 @@ class Kinematics: #Kinematics class
 		v_JG = np.array([0, 0]) #vector from the current Joint to the Goal point
 
 		for _ in range(0, n):
+			#print("S_0: " + str(servo0.currentServoPos_deg)); print("S_1: " + str(servo1.currentServoPos_deg)); print("S_2: " + str(servo2.currentServoPos_deg))
 			#Determine the vector component values depending on the joint counter value
 				#Get the end-effector's current position given the current joint angles
-			x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos, servo1.currentServoPos, servo2.currentServoPos)
+			x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg); print(x_e, y_e)
 				#Get the kth joint's current position given the current joint angles
-			x_j, y_j = self.get_joint_pos(k, servo0.currentServoPos, servo1.currentServoPos, servo2.currentServoPos)
+			x_j, y_j = self.get_joint_pos(k, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg); print(x_j, y_j)
 				#Calculate the component values for vector JE (Joint to end-effector)
 			v_JE[0] = x_e - x_j
 			v_JE[1] = y_e - y_j
 				#Calculate the component values for vector JG (Joint to goal point)
 			v_JG[0] = x_g - x_j
 			v_JG[1] = y_g - y_j
-			
+
 			#Find the magnitude of the vectors
 			mag_v_JE = np.sqrt(v_JE.dot(v_JE)) #The dot gives you the value underneath the sqrt of a magnitude formula; therefore, sqrt gives the magnitude
 			mag_v_JG = np.sqrt(v_JG.dot(v_JG))
 
 			#Use the dot product formula to calculate the angle between the two vectors
-			ang = m.acos( (v_JE.dot(v_JG)) / (mag_v_JE*mag_v_JG) ); print((ang*m.pi)/180)
+			ang = m.acos( (v_JE.dot(v_JG)) / (mag_v_JE*mag_v_JG) )
+			ang_deg = (ang*180)/m.pi; print("To write ang: "+ str(ang_deg))
 
 			#Change the kth joint's angle by the calculated angle
-			if k == 0: servo0.currentServoPos = servo0.currentServoPos + ang; print((servo0.currentServoPos*m.pi)/180)
-			elif k == 1: servo1.currentServoPos = servo1.currentServoPos - ang; print(servo1.currentServoPos*m.pi/180)
-			elif k == 2: servo2.currentServoPos = servo2.currentServoPos - ang; print((servo2.currentServoPos*m.pi)/180)
+			if k == 0: servo0.set_position(servo0.currentServoPos_deg + ang_deg); print("New_ang: " + str(servo0.currentServoPos_deg))
+			elif k == 1: servo1.set_position(servo1.currentServoPos_deg - ang_deg); print("New_ang: " + str(servo1.currentServoPos_deg))
+			elif k == 2: servo2.set_position(servo2.currentServoPos_deg - ang_deg); print("New_ang: " + str(servo2.currentServoPos_deg))
 
 			# print((ang*m.pi)/180) #Turn radians to degrees
 			# print(k)
 
 			#Increment the joint counter
-			if k < 3: k+=1
-			elif k == 2: k = 0
+			k+=1
+			if k == 3: k = 0
 			print(k-1)
-			
-			sleep(15)
+
+			sleep(0.5)
 
 
 kinematics = Kinematics()
@@ -180,5 +185,7 @@ servo1 = Servo_control(3)
 servo2 = Servo_control(4) #Inner most servo
 
 while True:
-    # kinematics.play_forward()
-	kinematics.play_inverse(0, 238.65, 50)
+	x = int(input("Enter x: "))
+	y = int(input("Enter y: "))
+	n = int(input("Enter number of iterations: "))
+	kinematics.play_inverse(x+31.6, y, n)
