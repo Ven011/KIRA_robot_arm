@@ -55,7 +55,11 @@ class Kinematics: #Kinematics class
 		self.a2 = 86.80
 		self.a3 = 65.05
 
-	def F_with(self, T0, T1, T2): #Params are angles in degrees to set the servo of each module
+	#Calculates and returns the position of the specified joint
+	def get_joint_pos(self, J_num): #Param is the joint number desired (innermost joint/servo = 1, middle = 2, outermost = 3, end-effector = 4)
+		
+
+	def forward_with(self, T0, T1, T2): #Params are angles in degrees to set the servo of each module
 		#Change servo position value to degree value E.x. 90 degree servo pos = 0 degree
 		#						  0 servo pos = 90 degree
 		#                                                 180 servo pos = -90 degree
@@ -92,6 +96,17 @@ class Kinematics: #Kinematics class
 
 		return x_pos, y_pos
 
+	def inverse_with(self, x, y): #Params are the x and y coordinate to place the end effector.
+		#Declare and/or Initialize essential variables
+		J1_ang = 0 #Joint 1 (Innermost servo) is set to 0 degrees
+		J2_ang = 180
+		J3_ang = 180
+
+		k = 1 #Joint counter
+		goal_reached = False
+
+		
+
 
 
 kinematics = Kinematics()
@@ -108,7 +123,7 @@ while True:
 	servo2.set_position(ang2)
 	servo3.set_position(ang3) #Write servo position. Starting from the innermost servo to reduce backlash
 
-	x, y = kinematics.F_with(ang1, ang2, ang3)
+	x, y = kinematics.forward_with(ang1, ang2, ang3)
 	print('x: ' + str(x+31.6)) #Account for distance between actual start of robot arm and the arm holder
 	print('y: ' + str(y))
 	print()
