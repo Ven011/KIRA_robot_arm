@@ -167,17 +167,19 @@ class Kinematics: #Kinematics class
 	def play_inverse(self, x_g, y_g, n): #Params: 1, 2. The x and y coordinate to place the end effector/ the goal position's x and y coordinate
 									  #        3. Number of iterations of the algorithm we should go through 
 		# #Declare and/or Initialize essential variables
-		servo0.set_position(0) #Joint 1 (Innermost servo) is set to 0 degrees
-		servo1.set_position(180)
-		servo2.set_position(180)
+		servo0.set_position(180) #Joint 1 (Innermost servo) is set to 0 degrees
+		servo1.set_position(0)
+		servo2.set_position(0)
 
 		k = 0 #Joint counter
+		iteration_counter = 0
 
 		#Declare the vectors to be used
 		v_JE = np.array([0, 0]) #vector from the current Joint to the End-effector
 		v_JG = np.array([0, 0]) #vector from the current Joint to the Goal point
 
 		for _ in range(0, n):
+			iteration_counter += 1
 			#print("S_0: " + str(servo0.currentServoPos_deg)); print("S_1: " + str(servo1.currentServoPos_deg)); print("S_2: " + str(servo2.currentServoPos_deg))
 			#Determine the vector component values depending on the joint counter value
 				#Get the end-effector's current position given the current joint angles
@@ -206,13 +208,13 @@ class Kinematics: #Kinematics class
 				elif not self.add_angle(0, ang_deg, x_g, y_g) and servo0.currentServoPos_deg - ang_deg >= 0: servo0.set_position(servo0.currentServoPos_deg - ang_deg);
 
 				print("New_ang: " + str(servo0.currentServoPos_deg))
-			elif k == 1: 
+			elif k == 1:
 				#Check whether the determined angle should be added or subtracted
 				if self.add_angle(1, ang_deg, x_g, y_g) and servo1.currentServoPos_deg + ang_deg <= 180: servo1.set_position(servo1.currentServoPos_deg + ang_deg); 
 				elif not self.add_angle(0, ang_deg, x_g, y_g) and servo1.currentServoPos_deg - ang_deg >= 0: servo1.set_position(servo1.currentServoPos_deg - ang_deg);
 
 				print("New_ang: " + str(servo1.currentServoPos_deg))
-			elif k == 2: 
+			elif k == 2:
 				#Check whether the determined angle should be added or subtracted
 				if self.add_angle(2, ang_deg, x_g, y_g) and servo2.currentServoPos_deg + ang_deg <= 180: servo2.set_position(servo2.currentServoPos_deg + ang_deg); 
 				elif not self.add_angle(0, ang_deg, x_g, y_g) and servo2.currentServoPos_deg - ang_deg >= 0: servo2.set_position(servo2.currentServoPos_deg - ang_deg);
@@ -223,7 +225,7 @@ class Kinematics: #Kinematics class
 				#Calculate the end-effector's current position
 			x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg);
 				#Check if the end-effector is within a region around the goal point
-			if (x_e < x_g + 1 and x_e > x_g - 1) and (y_e < y_g + 1 and y_e > y_g - 1): break
+			if (x_e < x_g + 15 and x_e > x_g - 15) and (y_e < y_g + 15 and y_e > y_g - 15): break
 
 			#Increment the joint counter
 			k+=1
@@ -232,8 +234,9 @@ class Kinematics: #Kinematics class
 			sleep(0.25)
 
 		x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg);
-		print("End-effector pos: " + str(x_e) + str(y_e))
-		print("Goal pos: " + str(x_g) + str(y_g))
+		print("End-effector pos: " + str(x_e) + " " + str(y_e))
+		print("Goal pos: " + str(x_g) + " " + str(y_g))
+		print("Number of iterations taken: " + str(iteration_counter))
 
 
 kinematics = Kinematics()
@@ -245,4 +248,4 @@ while True:
 	x = int(input("Enter x: "))
 	y = int(input("Enter y: "))
 	n = int(input("Enter number of iterations: "))
-	kinematics.play_inverse(x+31.6, y, n)
+	kinematics.play_inverse(x, y, n)
