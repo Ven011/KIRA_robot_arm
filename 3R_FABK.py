@@ -139,7 +139,6 @@ class Kinematics: #Kinematics class
 		x_j, y_j = self.get_joint_pos(J_num, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg)
 			#Use slope formula to calculate the slope
 		comp_slope = (y_g - y_j) / (x_g - x_j)
-		print("C: " + str(comp_slope))
 
 		#Add the angle to the joint and see if the resulting slope between the end-effector and the goal point matches the comp_slope
 			#Get the position of the end-effector given the you have added the angle to the kth joint
@@ -148,7 +147,6 @@ class Kinematics: #Kinematics class
 		elif J_num == 2: x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg + ang)
 			#Calculate the slope of the line between the end-effector and the goal point
 		add_slope =  (y_g - y_e) / (x_g - x_e)
-		print("+: " + str(add_slope))
 
 		#Subtract the angle to the joint and see if the resulting slope between the end-effector and the goal point matches the comp_slope
 			#Get the position of the end-effector given the you have subtracted the angle to the kth joint
@@ -157,7 +155,6 @@ class Kinematics: #Kinematics class
 		elif J_num == 2: x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg - ang)
 			#Calculate the slope of the line between the end-effector and the goal point
 		subtract_slope =  (y_g - y_e) / (x_g - x_e)
-		print("-: " + str(subtract_slope))
 
 		#Compare the slopes, add_slope has to be within some range of the comp_slope
 		if add_slope > comp_slope - 0.2 and add_slope < comp_slope + 0.2: return True
@@ -199,27 +196,21 @@ class Kinematics: #Kinematics class
 
 			#Use the dot product formula to calculate the angle between the two vectors
 			ang = m.acos( (v_JE.dot(v_JG)) / (mag_v_JE*mag_v_JG) )
-			ang_deg = (ang*180)/m.pi; print("To write ang: "+ str(ang_deg))
+			ang_deg = (ang*180)/m.pi
 
 			#Change the kth joint's angle by the calculated angle
 			if k == 0:
 				#Check whether the determined angle should be added or subtracted
 				if self.add_angle(0, ang_deg, x_g, y_g) and servo0.currentServoPos_deg + ang_deg <= 180: servo0.set_position(servo0.currentServoPos_deg + ang_deg); 
 				elif not self.add_angle(0, ang_deg, x_g, y_g) and servo0.currentServoPos_deg - ang_deg >= 0: servo0.set_position(servo0.currentServoPos_deg - ang_deg);
-
-				print("New_ang: " + str(servo0.currentServoPos_deg))
 			elif k == 1:
 				#Check whether the determined angle should be added or subtracted
 				if self.add_angle(1, ang_deg, x_g, y_g) and servo1.currentServoPos_deg + ang_deg <= 180: servo1.set_position(servo1.currentServoPos_deg + ang_deg); 
 				elif not self.add_angle(0, ang_deg, x_g, y_g) and servo1.currentServoPos_deg - ang_deg >= 0: servo1.set_position(servo1.currentServoPos_deg - ang_deg);
-
-				print("New_ang: " + str(servo1.currentServoPos_deg))
 			elif k == 2:
 				#Check whether the determined angle should be added or subtracted
 				if self.add_angle(2, ang_deg, x_g, y_g) and servo2.currentServoPos_deg + ang_deg <= 180: servo2.set_position(servo2.currentServoPos_deg + ang_deg); 
 				elif not self.add_angle(0, ang_deg, x_g, y_g) and servo2.currentServoPos_deg - ang_deg >= 0: servo2.set_position(servo2.currentServoPos_deg - ang_deg);
-
-				print("New_ang: " + str(servo2.currentServoPos_deg))
 			
 			#Check if the end-effector is within a reasonable range around the goal point and stop iterating if so.
 				#Calculate the end-effector's current position
@@ -234,9 +225,11 @@ class Kinematics: #Kinematics class
 			sleep(0.25)
 
 		x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg);
+		print("************************************************************************")
 		print("End-effector pos: " + str(x_e) + " " + str(y_e))
 		print("Goal pos: " + str(x_g) + " " + str(y_g))
 		print("Number of iterations taken: " + str(iteration_counter))
+		print("************************************************************************")
 
 
 kinematics = Kinematics()
