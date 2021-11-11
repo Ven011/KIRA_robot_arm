@@ -1,7 +1,3 @@
-#Make sure "sudo pigpiod" is invoked in terminal before start.
-#	The pigpio daemon background process will not let go of GPIO pins unless the raspberry pi is restarted/rebooted.
-#Servo control module.
-
 from gpiozero import Servo
 from gpiozero.pins.pigpio import PiGPIOFactory
 from time import sleep
