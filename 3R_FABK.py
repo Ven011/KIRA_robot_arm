@@ -233,7 +233,7 @@ class Kinematics: #Kinematics class
 		print()
 		print("End-effector pos: " + "x: " + str(x_e) + "  y: " + str(y_e))
 		print("Goal pos: " + "x:  " + str(x_g) + "  y: " + str(y_g))
-		print("Number of iterations taken: " + str(iteration_counter)
+		print("Number of iterations taken: " + str(iteration_counter))
 
 
 kinematics = Kinematics()
