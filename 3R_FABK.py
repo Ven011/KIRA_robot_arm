@@ -35,7 +35,7 @@ class Servo_control:
 				writePos = writePos + 0.01 #Increment the writePos of the servo by 0.01
 				self.servo.value = writePos #write servo position
 				self.currentServoPos = writePos #Update the servo's position
-				sleep(0.002) #sleep 2ms
+				sleep(0.02) #sleep 2ms
 
 		elif pos < self.currentServoPos:
 			writePos = self.currentServoPos
@@ -43,7 +43,7 @@ class Servo_control:
 				writePos = writePos - 0.01 #Decrement the writePos
 				self.servo.value = writePos
 				self.currentServoPos = writePos
-				sleep(0.002)
+				sleep(0.02)
 
 		elif pos == self.currentServoPos:
 			pass #Do nothing because we are already at that position
@@ -57,6 +57,10 @@ class Kinematics: #Kinematics class
 		self.a1 = 86.80 
 		self.a2 = 86.80
 		self.a3 = 65.05
+
+		#IK variables
+		self.MOE = 10; #Margin of error, the end-effector is allowed to be at a final position MOE mm away from the goal point 
+		self.ITERATION_DELAY = 0.25 #Amount of sleep time between IK algorithm iterations
 
 	#Calculates and returns the position of the specified joint given the joint angles
 	def get_joint_pos(self, J_num, T0 = 0, T1 = 0, T2 = 0): #Params: 1. The joint number desired (innermost joint/servo = 0, middle = 1, outermost = 1, end-effector = 3)
@@ -114,6 +118,7 @@ class Kinematics: #Kinematics class
 
 	def play_forward(self):
 		#Get the angles to be written.
+		print("*****Angle unit is degrees*****")
 		ang0 = int(input("Joint 0 angle: "))
 		ang1 = int(input("Joint 1 angle: "))
 		ang2 = int(input("Joint 2 angle: "))
@@ -125,8 +130,8 @@ class Kinematics: #Kinematics class
 
 		#Get the position of the end-effector.
 		x, y = self.get_joint_pos(3, ang0, ang1, ang2)
-		print('End-effector x: ' + str(x)) #Account for distance between actual start of robot arm and the arm holder
-		print('End-effector y: ' + str(y))
+		print('End-effector x (mm): ' + str(x)) #Account for distance between actual start of robot arm and the arm holder
+		print('End-effector y (mm): ' + str(y))
 		print()
 
 
@@ -163,8 +168,9 @@ class Kinematics: #Kinematics class
 
 	def play_inverse(self): #Params: 1, 2. The x and y coordinate to place the end effector/ the goal position's x and y coordinate
    		        	  #        3. Number of iterations of the algorithm we should go through 
-		x_g = int(input("Enter x: "))
-		y_g = int(input("Enter y: "))
+		x_g = int(input("Enter x (in mm): "))
+		y_g = int(input("Enter y (in mm): "))
+		self.MOE = int(input("Enter Margin of Error (mm): "))
 		n = int(input("Enter number of iterations: "))
 
 		# #Declare and/or Initialize essential variables
@@ -222,17 +228,17 @@ class Kinematics: #Kinematics class
 				#Calculate the end-effector's current position
 			x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg);
 				#Check if the end-effector is within a region around the goal point
-			if (x_e < x_g + 15 and x_e > x_g - 15) and (y_e < y_g + 15 and y_e > y_g - 15): break
+			if (x_e < x_g + self.MOE and x_e > x_g - self.MOE) and (y_e < y_g + self.MOE and y_e > y_g - self.MOE): break
 
 			#Increment the joint counter
 			k+=1
 			if k == 3: k = 0
-			sleep(0.25)
+			sleep(self.ITERATION_DELAY)
 
 		x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg);
 		print()
-		print("End-effector pos: " + "x: " + str(x_e) + "  y: " + str(y_e))
-		print("Goal pos: " + "x:  " + str(x_g) + "  y: " + str(y_g))
+		print("End-effector pos (mm): " + "x: " + str(x_e) + "  y: " + str(y_e))
+		print("Goal pos (mm): " + "x:  " + str(x_g) + "  y: " + str(y_g))
 		print("Number of iterations taken: " + str(iteration_counter))
 
 
@@ -243,6 +249,8 @@ servo2 = Servo_control(4) #Inner most servo
 
 print("*************************************************************************");
 while True:
-	option = input("What would you like to try? Forward Kinematics - 0 or Inverse Kinematics - 1: ");
-	if not option: kinematics.play_forward()
-	else: kinematics.play_inverse()
+	print("*************************************************************************");
+	option = int(input("What would you like to try? Forward Kinematics - 0 or Inverse Kinematics - 1: "));
+	if option: kinematics.play_inverse()
+	else: kinematics.play_forward()
+	print("*************************************************************************");
