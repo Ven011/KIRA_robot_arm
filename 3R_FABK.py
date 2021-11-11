@@ -48,7 +48,7 @@ class Servo_control:
 		elif pos == self.currentServoPos:
 			pass #Do nothing because we are already at that position
 
-		self.currentServoPos_deg = int((self.currentServoPos + 1) * 90); print(self.currentServoPos_deg)
+		self.currentServoPos_deg = (self.currentServoPos + 1) * 90
 
 class Kinematics: #Kinematics class
 	#All distances are in millimeters (mm)
@@ -125,8 +125,8 @@ class Kinematics: #Kinematics class
 
 		#Get the position of the end-effector.
 		x, y = self.get_joint_pos(3, ang0, ang1, ang2)
-		print('x: ' + str(x)) #Account for distance between actual start of robot arm and the arm holder
-		print('y: ' + str(y))
+		print('End-effector x: ' + str(x)) #Account for distance between actual start of robot arm and the arm holder
+		print('End-effector y: ' + str(y))
 		print()
 
 
@@ -161,12 +161,18 @@ class Kinematics: #Kinematics class
 		else: return False
 
 
-	def play_inverse(self, x_g, y_g, n): #Params: 1, 2. The x and y coordinate to place the end effector/ the goal position's x and y coordinate
-									  #        3. Number of iterations of the algorithm we should go through 
+	def play_inverse(self): #Params: 1, 2. The x and y coordinate to place the end effector/ the goal position's x and y coordinate
+   		        	  #        3. Number of iterations of the algorithm we should go through 
+		x_g = int(input("Enter x: "))
+		y_g = int(input("Enter y: "))
+		n = int(input("Enter number of iterations: "))
+
 		# #Declare and/or Initialize essential variables
 		servo0.set_position(180) #Joint 1 (Innermost servo) is set to 0 degrees
 		servo1.set_position(0)
 		servo2.set_position(0)
+
+		sleep(3)
 
 		k = 0 #Joint counter
 		iteration_counter = 0
@@ -180,7 +186,7 @@ class Kinematics: #Kinematics class
 			#print("S_0: " + str(servo0.currentServoPos_deg)); print("S_1: " + str(servo1.currentServoPos_deg)); print("S_2: " + str(servo2.currentServoPos_deg))
 			#Determine the vector component values depending on the joint counter value
 				#Get the end-effector's current position given the current joint angles
-			x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg);
+			x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg)
 				#Get the kth joint's current position given the current joint angles
 			x_j, y_j = self.get_joint_pos(k, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg)
 				#Calculate the component values for vector JE (Joint to end-effector)
@@ -221,15 +227,13 @@ class Kinematics: #Kinematics class
 			#Increment the joint counter
 			k+=1
 			if k == 3: k = 0
-
 			sleep(0.25)
 
 		x_e, y_e = self.get_joint_pos(3, servo0.currentServoPos_deg, servo1.currentServoPos_deg, servo2.currentServoPos_deg);
-		print("************************************************************************")
-		print("End-effector pos: " + str(x_e) + " " + str(y_e))
-		print("Goal pos: " + str(x_g) + " " + str(y_g))
-		print("Number of iterations taken: " + str(iteration_counter))
-		print("************************************************************************")
+		print()
+		print("End-effector pos: " + "x: " + str(x_e) + "  y: " + str(y_e))
+		print("Goal pos: " + "x:  " + str(x_g) + "  y: " + str(y_g))
+		print("Number of iterations taken: " + str(iteration_counter)
 
 
 kinematics = Kinematics()
@@ -237,8 +241,8 @@ servo0 = Servo_control(2) #Outer most servo
 servo1 = Servo_control(3)
 servo2 = Servo_control(4) #Inner most servo
 
+print("*************************************************************************");
 while True:
-	x = int(input("Enter x: "))
-	y = int(input("Enter y: "))
-	n = int(input("Enter number of iterations: "))
-	kinematics.play_inverse(x, y, n)
+	option = input("What would you like to try? Forward Kinematics - 0 or Inverse Kinematics - 1: ");
+	if not option: kinematics.play_forward()
+	else: kinematics.play_inverse()
